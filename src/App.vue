@@ -1,9 +1,9 @@
 <template>
   <div class="app-container">
     <header class="nav-bar">
-      <BrandLogo :name="siteData.brand.name" />
+      <BrandLogo :name="site.brand.name" />
       <nav class="menu">
-        <a v-for="item in siteData.nav" :key="item.id" :href="`#${item.id}`">
+        <a v-for="item in site.nav" :key="item.id" :href="`#${item.id}`">
           {{ item.name }}
         </a>
       </nav>
@@ -16,11 +16,11 @@
       <div class="hero-content">
         <div class="version-badge">✨ 全新本地出行生态</div>
 
-        <h1 class="hero-title">{{ siteData.hero.title }}</h1>
-        <p class="hero-desc">{{ siteData.hero.desc }}</p>
+        <h1 class="hero-title">{{ site.hero.title }}</h1>
+        <p class="hero-desc">{{ site.hero.desc }}</p>
         <div class="hero-actions">
-            <button class="btn primary" @click="triggerDemoUnlock">{{ siteData.hero.ctaPrimary }}</button>
-            <button class="btn secondary">{{ siteData.hero.ctaSecondary }}</button>
+            <button class="btn primary" @click="triggerDemoUnlock">{{ site.hero.ctaPrimary }}</button>
+            <button class="btn secondary">{{ site.hero.ctaSecondary }}</button>
           </div>
       </div>
 
@@ -30,13 +30,13 @@
 
     <section id="about" class="about-section">
       <div class="section-container">
-        <h2 class="section-title">{{ siteData.about.title }}</h2>
+        <h2 class="section-title">{{ site.about.title }}</h2>
         <div class="divider"></div>
-        <p class="about-desc">{{ siteData.about.desc }}</p>
+        <p class="about-desc">{{ site.about.desc }}</p>
         <div class="tags-wrapper">
           <span
             class="about-tag"
-            v-for="tag in siteData.about.tags"
+            v-for="tag in site.about.tags"
             :key="tag"
             >{{ tag }}</span
           >
@@ -51,7 +51,7 @@
         <div class="grid-container">
           <div
             class="feature-card"
-            v-for="(feat, index) in siteData.features"
+            v-for="(feat, index) in site.features"
             :key="index"
           >
             <div class="feat-icon">{{ feat.icon }}</div>
@@ -63,14 +63,14 @@
     </section>
     <section id="product" class="product-section">
       <div class="section-container">
-        <h2 class="section-title">{{ siteData.product.title }}</h2>
+        <h2 class="section-title">{{ site.product.title }}</h2>
         <div class="divider"></div>
-        <p class="section-desc">{{ siteData.product.desc }}</p>
+        <p class="section-desc">{{ site.product.desc }}</p>
 
         <div class="product-showcase">
             <div class="qr-container">
               <div class="qr-box unlock-box" @click="triggerDemoUnlock">
-                <div class="unlock-text">🔒 {{ siteData.product.unlockText }}</div>
+                <div class="unlock-text">🔒 {{ site.product.unlockText }}</div>
               </div>
               <p>微信扫一扫 体验小程序</p>
             </div>
@@ -80,13 +80,13 @@
 
     <section id="roadmap" class="roadmap-section">
       <div class="section-container">
-        <h2 class="section-title">{{ siteData.roadmap.title }}</h2>
+        <h2 class="section-title">{{ site.roadmap.title }}</h2>
         <div class="divider"></div>
 
         <div class="timeline">
           <div
             class="timeline-item"
-            v-for="(phase, index) in siteData.roadmap.phases"
+            v-for="(phase, index) in site.roadmap.phases"
             :key="index"
           >
             <div class="timeline-dot"></div>
@@ -102,36 +102,36 @@
 
     <footer id="contact" class="compliance-footer">
       <div class="footer-content">
-        <BrandLogo :name="siteData.brand.name" class="footer-logo" />
+        <BrandLogo :name="site.brand.name" class="footer-logo" />
 
         <div class="footer-grid">
           <div class="footer-col">
             <h4>联系我们</h4>
-            <p>电话：{{ siteData.footer.phone }}</p>
-            <p>邮箱：{{ siteData.footer.email }}</p>
-            <p>地址：{{ siteData.footer.address }}</p>
-            <p>工作时间：{{ siteData.footer.workHours }}</p>
+            <p>电话：{{ site.footer.phone }}</p>
+            <p>邮箱：{{ site.footer.email }}</p>
+            <p>地址：{{ site.footer.address }}</p>
+            <p>工作时间：{{ site.footer.workHours }}</p>
           </div>
 
                     <div class="footer-col">
             <h4>法律信息</h4>
             <p>
-              © {{ new Date().getFullYear() }} {{ siteData.brand.fullName }}
+              © {{ new Date().getFullYear() }} {{ site.brand.fullName }}
             </p>
             <p>
               <a href="javascript:void(0)" @click.prevent="showLicense = true" class="license-link">
                 营业执照
               </a>
             </p>
-            <p>{{ siteData.footer.creditCode }}</p>
+            <p>{{ site.footer.creditCode }}</p>
             <p class="beian-links">
               <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">
-                {{ siteData.footer.icp }}
+                {{ site.footer.icp }}
               </a>
               <span class="separator">|</span>
               <a href="http://www.beian.gov.cn/" target="_blank" rel="noopener noreferrer" class="gongan-link">
                 <img src="https://img.shabox.fun/@system/icons/gongan.png" alt="公安备案" v-if="false" />
-                {{ siteData.footer.gongAn }}
+                {{ site.footer.gongAn }}
               </a>
             </p>
           </div>
@@ -142,7 +142,7 @@
   </div>
   <aside class="floating-nav">
     <a
-      v-for="item in siteData.nav"
+      v-for="item in site.nav"
       :key="'side-' + item.id"
       :href="`#${item.id}`"
       class="float-item"
@@ -180,7 +180,7 @@
     >
       <button class="lightbox-close" @click="showLicense = false">×</button>
       <img
-        :src="siteData.footer.licenseImg"
+        :src="site.footer.licenseImg"
         alt="营业执照"
         class="lightbox-img"
         @click.stop
@@ -219,13 +219,14 @@
       </div>
     </transition>
 
-
+  <AdminPanel />
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from "vue";
-import { siteData } from "@/config/site";
+import { site } from "@/config/siteStore";
 import BrandLogo from "@/components/BrandLogo.vue";
+import AdminPanel from "@/components/AdminPanel.vue";
 // 滚动状态机：控制回顶按钮的挂载与卸载
 const showBackToTop = ref(false);
 const showLicense = ref(false);
@@ -259,11 +260,11 @@ const verifyInviteCode = () => {
   }
 
   // 与 site.js 中的 hash 值进行物理碰撞比对
-  if (h === siteData.product.inviteHash) {
+  if (h === site.product.inviteHash) {
     showInviteModal.value = false;
 
     // 👇 校验通过！立刻用用户输入的密码作为密钥，解密出真实的图片 URL
-    decryptedQrUrl.value = decryptUrl(siteData.product.qrCodeCipher, str);
+    decryptedQrUrl.value = decryptUrl(site.product.qrCodeCipher, str);
 
     showDemoQr.value = true;
   } else {

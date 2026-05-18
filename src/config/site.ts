@@ -1,35 +1,35 @@
-interface Brand {
+export interface Brand {
   name: string;
   fullName: string;
   slogan: string;
   colors: [string, string];
 }
 
-interface NavItem {
+export interface NavItem {
   id: string;
   name: string;
 }
 
-interface Hero {
+export interface Hero {
   title: string;
   desc: string;
   ctaPrimary: string;
   ctaSecondary: string;
 }
 
-interface About {
+export interface About {
   title: string;
   desc: string;
   tags: string[];
 }
 
-interface Feature {
+export interface Feature {
   title: string;
   desc: string;
   icon: string;
 }
 
-interface Product {
+export interface Product {
   title: string;
   desc: string;
   unlockText: string;
@@ -38,18 +38,18 @@ interface Product {
   mockups: string[];
 }
 
-interface RoadmapPhase {
+export interface RoadmapPhase {
   version: string;
   title: string;
   desc: string;
 }
 
-interface Roadmap {
+export interface Roadmap {
   title: string;
   phases: RoadmapPhase[];
 }
 
-interface Footer {
+export interface Footer {
   icp: string;
   gongAn: string;
   creditCode: string;
@@ -60,7 +60,7 @@ interface Footer {
   workHours: string;
 }
 
-interface SiteData {
+export interface SiteData {
   brand: Brand;
   nav: NavItem[];
   hero: Hero;
