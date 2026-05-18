@@ -222,9 +222,9 @@
 
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, onUnmounted } from "vue";
-import { siteData } from "@/config/site.js";
+import { siteData } from "@/config/site";
 import BrandLogo from "@/components/BrandLogo.vue";
 // 滚动状态机：控制回顶按钮的挂载与卸载
 const showBackToTop = ref(false);
@@ -371,12 +371,14 @@ html {
    首屏区 (Hero)
    ======================================================= */
 .hero-section {
+  position: relative;
   min-height: 85vh;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
   padding: 80px 20px;
+  overflow: hidden;
   background:
     radial-gradient(
       circle at top right,
@@ -920,22 +922,6 @@ html {
 }
 
 
-/* =======================================================
-   首屏区视觉升维 (GPU 加速与几何绘制)
-   ======================================================= */
-/* 必须放在 @media 外部，确保 PC 和移动端共享基础物理定位 */
-.hero-section {
-  position: relative;
-  min-height: 85vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 80px 20px;
-  background: #f8fafc;
-  overflow: hidden;
-}
-
 /* 科技感网格背景 */
 .tech-grid-bg {
   position: absolute;
@@ -954,36 +940,6 @@ html {
     black 40%,
     transparent 80%
   );
-}
-/* =======================================================
-   首屏微标签 (Badge) 几何绘制
-   ======================================================= */
-.version-badge {
-  display: inline-block;
-  padding: 6px 16px;
-  margin-bottom: 20px;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--theme-end);
-  background: rgba(54, 188, 229, 0.1);
-  border: 1px solid rgba(54, 188, 229, 0.3);
-  border-radius: 30px;
-  box-shadow: 0 0 15px rgba(54, 188, 229, 0.2);
-  animation: pulseGlow 2s infinite alternate;
-}
-
-@keyframes pulseGlow {
-  from {
-    box-shadow: 0 0 10px rgba(54, 188, 229, 0.1);
-  }
-  to {
-    box-shadow: 0 0 20px rgba(54, 188, 229, 0.4);
-  }
-}
-
-/* 隐藏 PC 端的移动按钮 */
-.mobile-nav-btn {
-  display: none;
 }
 .mobile-fab-group {
   display: none;
