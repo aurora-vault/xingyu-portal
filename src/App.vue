@@ -224,7 +224,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from "vue";
-import { site } from "@/config/siteStore";
+import { site, fetchSiteConfig, subscribeSiteEvents } from "@/config/siteStore";
 import BrandLogo from "@/components/BrandLogo.vue";
 import AdminPanel from "@/components/AdminPanel.vue";
 // 滚动状态机：控制回顶按钮的挂载与卸载
@@ -235,6 +235,7 @@ const showDemoQr = ref(false);
 const inviteCode = ref("");
 const inviteError = ref(false);
 const decryptedQrUrl = ref("");
+let unsubscribeSse: (() => void) | null = null;
 
 // 触发器：打开输入框
 const triggerDemoUnlock = () => {
@@ -282,13 +283,14 @@ const scrollToTop = () => {
 };
 
 onMounted(() => {
-  // 核心防御：必须开启 passive: true，禁止 preventDefault 阻塞渲染主线程
   window.addEventListener("scroll", handleScroll, { passive: true });
+  fetchSiteConfig();
+  unsubscribeSse = subscribeSiteEvents();
 });
 
 onUnmounted(() => {
-  // 严格的内存清理，防止组件卸载后的内存泄漏 (Memory Leak)
   window.removeEventListener("scroll", handleScroll);
+  unsubscribeSse?.();
 });
 </script>
 

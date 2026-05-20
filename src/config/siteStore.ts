@@ -2,30 +2,50 @@ import { reactive, watch } from 'vue'
 import { siteData } from './site'
 import type { SiteData } from './site'
 
-const STORAGE_KEY = 'xingyu-site-data'
+export const site = reactive<SiteData>(JSON.parse(JSON.stringify(siteData)))
 
-function loadInitial(): SiteData {
+// 从服务端拉取配置，覆盖默认值
+export async function fetchSiteConfig(): Promise<void> {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (raw) return JSON.parse(raw)
+    const res = await fetch('/api/site-config')
+    const json = await res.json()
+    if (json.ok && json.data) applyConfig(json.data)
   } catch {}
-  return JSON.parse(JSON.stringify(siteData))
 }
 
-export const site = reactive<SiteData>(loadInitial())
+// SSE 订阅：有人通过管理面板保存后，所有访客实时更新
+export function subscribeSiteEvents(): () => void {
+  const es = new EventSource('/api/site-config/events')
+  es.onmessage = (e) => {
+    try { applyConfig(JSON.parse(e.data)) } catch {}
+  }
+  return () => es.close()
+}
 
-watch(site, (val) => {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(val))
-}, { deep: true })
+function applyConfig(data: SiteData) {
+  site.brand    = data.brand
+  site.nav      = data.nav
+  site.hero     = data.hero
+  site.about    = data.about
+  site.features = data.features
+  site.product  = data.product
+  site.roadmap  = data.roadmap
+  site.footer   = data.footer
+}
+
+export async function saveSiteConfig(password: string): Promise<{ ok: boolean; msg?: string }> {
+  try {
+    const res = await fetch('/api/site-config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-admin-password': password },
+      body: JSON.stringify(site),
+    })
+    return res.json()
+  } catch {
+    return { ok: false, msg: '网络错误' }
+  }
+}
 
 export function resetSite(): void {
-  const d = JSON.parse(JSON.stringify(siteData)) as SiteData
-  site.brand = d.brand
-  site.nav = d.nav
-  site.hero = d.hero
-  site.about = d.about
-  site.features = d.features
-  site.product = d.product
-  site.roadmap = d.roadmap
-  site.footer = d.footer
+  applyConfig(JSON.parse(JSON.stringify(siteData)) as SiteData)
 }

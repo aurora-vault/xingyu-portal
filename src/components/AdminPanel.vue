@@ -23,6 +23,20 @@
           <button class="reset-btn" @click="handleReset">恢复默认</button>
         </div>
 
+        <div class="save-bar">
+          <input
+            class="pwd-input"
+            type="password"
+            v-model="adminPassword"
+            placeholder="管理员密码"
+            @keyup.enter="handleSave"
+          />
+          <button class="save-btn" :class="saveStatus" :disabled="saveStatus === 'saving'" @click="handleSave">
+            {{ saveStatus === 'saving' ? '保存中…' : '保存并发布' }}
+          </button>
+        </div>
+        <div v-if="saveMsg" class="save-msg" :class="saveStatus">{{ saveMsg }}</div>
+
         <nav class="drawer-nav">
           <button
             v-for="tab in tabs"
@@ -139,12 +153,24 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { site, resetSite } from '@/config/siteStore'
+import { site, resetSite, saveSiteConfig } from '@/config/siteStore'
 import Field from './admin/Field.vue'
 import EmojiPicker from './admin/EmojiPicker.vue'
 
 const open = ref(false)
 const activeTab = ref('brand')
+const adminPassword = ref('')
+const saveStatus = ref<'idle' | 'saving' | 'ok' | 'err'>('idle')
+const saveMsg = ref('')
+
+async function handleSave() {
+  if (!adminPassword.value) { saveMsg.value = '请输入管理员密码'; saveStatus.value = 'err'; return }
+  saveStatus.value = 'saving'
+  const result = await saveSiteConfig(adminPassword.value)
+  saveStatus.value = result.ok ? 'ok' : 'err'
+  saveMsg.value = result.ok ? '已保存并推送给所有访客' : (result.msg || '保存失败')
+  if (result.ok) setTimeout(() => { saveStatus.value = 'idle'; saveMsg.value = '' }, 3000)
+}
 
 const tabs = [
   { id: 'brand',    label: '品牌' },
@@ -239,6 +265,48 @@ function handleReset() {
   transition: all 0.2s;
 }
 .reset-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+
+.save-bar {
+  display: flex;
+  gap: 8px;
+  padding: 10px 16px;
+  border-bottom: 1px solid #e2e8f0;
+  flex-shrink: 0;
+  background: #f8fafc;
+}
+.pwd-input {
+  flex: 1;
+  padding: 7px 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 13px;
+  outline: none;
+  background: #fff;
+}
+.pwd-input:focus { border-color: #36bce5; }
+.save-btn {
+  padding: 7px 14px;
+  border-radius: 8px;
+  border: none;
+  background: #1d528d;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+.save-btn:hover:not(:disabled) { background: #36bce5; }
+.save-btn:disabled { opacity: 0.6; cursor: default; }
+.save-btn.ok { background: #16a34a; }
+.save-btn.err { background: #dc2626; }
+.save-msg {
+  padding: 6px 16px;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+.save-msg.ok { color: #16a34a; background: #f0fdf4; }
+.save-msg.err { color: #dc2626; background: #fef2f2; }
 
 .drawer-nav {
   display: flex;

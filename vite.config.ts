@@ -5,11 +5,14 @@ import { fileURLToPath, URL } from 'node:url'
 
 export default defineConfig({
   plugins: [vue()],
-  // 注入寻址别名魔法
   resolve: {
     alias: {
-      // 将 '@' 物理映射到当前项目磁盘的 './src' 绝对路径
       '@': fileURLToPath(new URL('./src', import.meta.url))
+    }
+  },
+  server: {
+    proxy: {
+      '/api': 'http://localhost:3000'
     }
   }
 })
