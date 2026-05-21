@@ -1,7 +1,9 @@
+name: xingyu-web
+
 services:
-  web:
+  site:
+    image: shabox/xingyu-web:latest
     build: .
-    container_name: xingyu-official
     restart: always
     ports:
       - "127.0.0.1:3010:3000"
@@ -11,3 +13,12 @@ services:
       - .env
     volumes:
       - ./server/data:/app/server/data
+    networks:
+      default: {}
+      web-network:
+        aliases:
+          - xingyu-web
+
+networks:
+  web-network:
+    external: true
