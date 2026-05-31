@@ -4,9 +4,7 @@ services:
   site:
     image: shabox/xingyu-web:latest
     build: .
-    restart: always
-    ports:
-      - "127.0.0.1:3010:3000"
+    restart: unless-stopped
     environment:
       - TZ=Asia/Shanghai
     env_file:
@@ -15,10 +13,11 @@ services:
       - ./server/data:/app/server/data
     networks:
       default: {}
-      web-network:
+      npm-net:
         aliases:
           - xingyu-web
 
 networks:
-  web-network:
+  npm-net:
     external: true
+    name: nginx-proxy-manager_npm-net
