@@ -158,8 +158,8 @@ export const siteData: Readonly<SiteData> = Object.freeze({
   },
 
   footer: {
-    icp: "陕ICP备XXXXXXX号-1",
-    gongAn: "陕公网安备 XXXXXXXX号",
+    icp: "鄂ICP备2026025932号-1",
+    gongAn: "鄂公网安备42018502009010号",
     creditCode: "统一社会信用代码：91510100XXXXXXX",
     licenseImg: "https://img.shabox.fun/posts/210901di-yi/00.webp",
     phone: "400-XXX-XXXX",

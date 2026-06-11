@@ -19,9 +19,11 @@
         <h1 class="hero-title">{{ site.hero.title }}</h1>
         <p class="hero-desc">{{ site.hero.desc }}</p>
         <div class="hero-actions">
-            <button class="btn primary" @click="triggerDemoUnlock">{{ site.hero.ctaPrimary }}</button>
-            <button class="btn secondary">{{ site.hero.ctaSecondary }}</button>
-          </div>
+          <button class="btn primary" @click="triggerDemoUnlock">
+            {{ site.hero.ctaPrimary }}
+          </button>
+          <button class="btn secondary">{{ site.hero.ctaSecondary }}</button>
+        </div>
       </div>
 
       <div class="floating-orb orb-1"></div>
@@ -34,12 +36,9 @@
         <div class="divider"></div>
         <p class="about-desc">{{ site.about.desc }}</p>
         <div class="tags-wrapper">
-          <span
-            class="about-tag"
-            v-for="tag in site.about.tags"
-            :key="tag"
-            >{{ tag }}</span
-          >
+          <span class="about-tag" v-for="tag in site.about.tags" :key="tag">{{
+            tag
+          }}</span>
         </div>
       </div>
     </section>
@@ -68,13 +67,13 @@
         <p class="section-desc">{{ site.product.desc }}</p>
 
         <div class="product-showcase">
-            <div class="qr-container">
-              <div class="qr-box unlock-box" @click="triggerDemoUnlock">
-                <div class="unlock-text">🔒 {{ site.product.unlockText }}</div>
-              </div>
-              <p>微信扫一扫 体验小程序</p>
+          <div class="qr-container">
+            <div class="qr-box unlock-box" @click="triggerDemoUnlock">
+              <div class="unlock-text">🔒 {{ site.product.unlockText }}</div>
             </div>
+            <p>微信扫一扫 体验小程序</p>
           </div>
+        </div>
       </div>
     </section>
 
@@ -113,29 +112,39 @@
             <p>工作时间：{{ site.footer.workHours }}</p>
           </div>
 
-                    <div class="footer-col">
+          <div class="footer-col">
             <h4>法律信息</h4>
+            <p>© {{ new Date().getFullYear() }} {{ site.brand.fullName }}</p>
             <p>
-              © {{ new Date().getFullYear() }} {{ site.brand.fullName }}
-            </p>
-            <p>
-              <a href="javascript:void(0)" @click.prevent="showLicense = true" class="license-link">
+              <a
+                href="javascript:void(0)"
+                @click.prevent="showLicense = true"
+                class="license-link"
+              >
                 营业执照
               </a>
             </p>
             <p>{{ site.footer.creditCode }}</p>
             <p class="beian-links">
-              <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">
+              <a
+                href="https://beian.miit.gov.cn/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 {{ site.footer.icp }}
               </a>
               <span class="separator">|</span>
-              <a href="http://www.beian.gov.cn/" target="_blank" rel="noopener noreferrer" class="gongan-link">
-                <img src="https://img.shabox.fun/@system/icons/gongan.png" alt="公安备案" v-if="false" />
+              <a
+                href="https://beian.mps.gov.cn/#/query/webSearch?code=42018502009010"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="gongan-link"
+              >
+                <img src="/gongan.png" alt="公安备案" />
                 {{ site.footer.gongAn }}
               </a>
             </p>
           </div>
-
         </div>
       </div>
     </footer>
@@ -187,37 +196,43 @@
       />
     </div>
   </transition>
-      <transition name="fade">
-      <div class="lightbox-overlay" v-if="showInviteModal" @click="showInviteModal = false">
-        <div class="invite-modal" @click.stop>
-          <h3>内部演示通道</h3>
-          <p>请输入邀测码以解锁产品 Demo</p>
-          <div class="input-group" :class="{ 'has-error': inviteError }">
-            <input
-              type="password"
-              v-model="inviteCode"
-              placeholder="请输入邀请码"
-              @keyup.enter="verifyInviteCode"
-              @input="inviteError = false"
-              autofocus
-            />
-            <button @click="verifyInviteCode">→</button>
-          </div>
-          <span class="error-msg" v-show="inviteError">邀请码不正确，请重新输入</span>
+  <transition name="fade">
+    <div
+      class="lightbox-overlay"
+      v-if="showInviteModal"
+      @click="showInviteModal = false"
+    >
+      <div class="invite-modal" @click.stop>
+        <h3>内部演示通道</h3>
+        <p>请输入邀测码以解锁产品 Demo</p>
+        <div class="input-group" :class="{ 'has-error': inviteError }">
+          <input
+            type="password"
+            v-model="inviteCode"
+            placeholder="请输入邀请码"
+            @keyup.enter="verifyInviteCode"
+            @input="inviteError = false"
+            autofocus
+          />
+          <button @click="verifyInviteCode">→</button>
         </div>
+        <span class="error-msg" v-show="inviteError"
+          >邀请码不正确，请重新输入</span
+        >
       </div>
-    </transition>
+    </div>
+  </transition>
 
-        <transition name="fade">
-      <div class="lightbox-overlay" v-if="showDemoQr" @click="showDemoQr = false">
-        <button class="lightbox-close" @click="showDemoQr = false">×</button>
-        <div class="demo-qr-panel" @click.stop>
-          <h3>微信扫码体验</h3>
-          <img :src="decryptedQrUrl" alt="Demo QR" class="demo-qr-img" />
-          <p>请使用授权的内部测试账号扫码</p>
-        </div>
+  <transition name="fade">
+    <div class="lightbox-overlay" v-if="showDemoQr" @click="showDemoQr = false">
+      <button class="lightbox-close" @click="showDemoQr = false">×</button>
+      <div class="demo-qr-panel" @click.stop>
+        <h3>微信扫码体验</h3>
+        <img :src="decryptedQrUrl" alt="Demo QR" class="demo-qr-img" />
+        <p>请使用授权的内部测试账号扫码</p>
       </div>
-    </transition>
+    </div>
+  </transition>
 
   <AdminPanel />
 </template>
@@ -245,9 +260,12 @@ const triggerDemoUnlock = () => {
 };
 // 核心解密引擎：XOR 逆向运算
 const decryptUrl = (hexStr, key) => {
-  return hexStr.match(/.{2}/g).map((h, i) =>
-    String.fromCharCode(parseInt(h, 16) ^ key.charCodeAt(i % key.length))
-  ).join('');
+  return hexStr
+    .match(/.{2}/g)
+    .map((h, i) =>
+      String.fromCharCode(parseInt(h, 16) ^ key.charCodeAt(i % key.length)),
+    )
+    .join("");
 };
 
 // 核心校验引擎：简单的字符串 Hash 算法 (极客级防 F12 偷窥)
@@ -257,7 +275,7 @@ const verifyInviteCode = () => {
   let h = 0;
   const str = inviteCode.value.trim();
   for (let i = 0; i < str.length; i++) {
-    h = Math.imul(31, h) + str.charCodeAt(i) | 0;
+    h = (Math.imul(31, h) + str.charCodeAt(i)) | 0;
   }
 
   // 与 site.js 中的 hash 值进行物理碰撞比对
@@ -847,10 +865,15 @@ html {
   border-color: var(--theme-start);
 }
 .unlock-text {
-  width: 150px; height: 150px;
+  width: 150px;
+  height: 150px;
   background: #f1f5f9;
-  display: flex; align-items: center; justify-content: center;
-  color: var(--theme-end); font-weight: bold; font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--theme-end);
+  font-weight: bold;
+  font-size: 15px;
   transition: all 0.3s;
 }
 .unlock-box:hover .unlock-text {
@@ -867,11 +890,19 @@ html {
   width: 90%;
   max-width: 400px;
   text-align: center;
-  box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
   animation: modalPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
-.invite-modal h3 { color: var(--theme-end); margin-bottom: 10px; font-size: 22px; }
-.invite-modal p { color: var(--text-gray); margin-bottom: 25px; font-size: 14px; }
+.invite-modal h3 {
+  color: var(--theme-end);
+  margin-bottom: 10px;
+  font-size: 22px;
+}
+.invite-modal p {
+  color: var(--text-gray);
+  margin-bottom: 25px;
+  font-size: 14px;
+}
 
 .input-group {
   display: flex;
@@ -891,39 +922,84 @@ html {
   animation: shake 0.4s ease-in-out;
 }
 .input-group input {
-  flex: 1; border: none; background: transparent; outline: none;
-  font-size: 16px; color: var(--text-dark);
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 16px;
+  color: var(--text-dark);
 }
 .input-group button {
-  width: 40px; height: 40px; border-radius: 50%; border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
   background: linear-gradient(135deg, var(--theme-start), var(--theme-end));
-  color: #fff; font-size: 18px; cursor: pointer; transition: transform 0.2s;
+  color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+  transition: transform 0.2s;
 }
-.input-group button:active { transform: scale(0.9); }
-.error-msg { display: block; color: #ef4444; font-size: 12px; margin-top: 10px; }
+.input-group button:active {
+  transform: scale(0.9);
+}
+.error-msg {
+  display: block;
+  color: #ef4444;
+  font-size: 12px;
+  margin-top: 10px;
+}
 
 /* =======================================================
    真实 Demo 渲染面板
    ======================================================= */
 .demo-qr-panel {
-  background: #fff; padding: 30px; border-radius: 16px; text-align: center;
+  background: #fff;
+  padding: 30px;
+  border-radius: 16px;
+  text-align: center;
   animation: modalPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
-.demo-qr-panel h3 { color: var(--theme-end); margin-bottom: 20px; }
-.demo-qr-img { width: 220px; height: 220px; border-radius: 8px; margin-bottom: 15px; }
-.demo-qr-panel p { color: var(--text-gray); font-size: 13px; }
+.demo-qr-panel h3 {
+  color: var(--theme-end);
+  margin-bottom: 20px;
+}
+.demo-qr-img {
+  width: 220px;
+  height: 220px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+}
+.demo-qr-panel p {
+  color: var(--text-gray);
+  font-size: 13px;
+}
 
 @keyframes modalPop {
-  from { opacity: 0; transform: scale(0.9) translateY(20px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  50% { transform: translateX(5px); }
-  75% { transform: translateX(-5px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  50% {
+    transform: translateX(5px);
+  }
+  75% {
+    transform: translateX(-5px);
+  }
 }
-
 
 /* 科技感网格背景 */
 .tech-grid-bg {
