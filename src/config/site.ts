@@ -76,7 +76,7 @@ export interface SiteData {
 export const siteData: Readonly<SiteData> = Object.freeze({
   brand: {
     name: "行遇",
-    fullName: "行遇网络科技有限公司",
+    fullName: "行遇（武汉）网络科技有限公司",
     slogan: "让每一次出行都有温度",
     colors: ["#36bce5", "#1d528d"],
   },
@@ -160,11 +160,12 @@ export const siteData: Readonly<SiteData> = Object.freeze({
   footer: {
     icp: "鄂ICP备2026025932号-1",
     gongAn: "鄂公网安备42018502009010号",
-    creditCode: "统一社会信用代码：91510100XXXXXXX",
+    creditCode: "统一社会信用代码：91420100MAKBNJMC9W",
     licenseImg: "https://img.shabox.fun/posts/210901di-yi/00.webp",
-    phone: "400-XXX-XXXX",
-    email: "pxman79@foxmail.com",
-    address: "陕西省西安市xx区XX路XX号",
+    phone: "",
+    email: "hi@xingyu.pro",
+    address:
+      "湖北省武汉东湖新技术开发区光谷大道特1号国际企业中心三期1栋4层03号J866",
     workHours: "周一至周日 09:00 - 18:00",
   },
 });

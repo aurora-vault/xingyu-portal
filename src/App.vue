@@ -106,10 +106,12 @@
         <div class="footer-grid">
           <div class="footer-col">
             <h4>联系我们</h4>
-            <p>电话：{{ site.footer.phone }}</p>
-            <p>邮箱：{{ site.footer.email }}</p>
-            <p>地址：{{ site.footer.address }}</p>
-            <p>工作时间：{{ site.footer.workHours }}</p>
+            <p v-if="site.footer.phone">电话：{{ site.footer.phone }}</p>
+            <p v-if="site.footer.email">邮箱：{{ site.footer.email }}</p>
+            <p v-if="site.footer.address">地址：{{ site.footer.address }}</p>
+            <p v-if="site.footer.workHours">
+              工作时间：{{ site.footer.workHours }}
+            </p>
           </div>
 
           <div class="footer-col">
