@@ -28,7 +28,8 @@ function applyConfig(data: SiteData) {
   site.hero     = data.hero
   site.about    = data.about
   site.features = data.features
-  site.product  = data.product
+  // product 做字段级合并：兼容旧版 site-config.json（缺 ctaText/h5Url 时回落默认，不崩）
+  site.product  = { ...site.product, ...data.product }
   site.roadmap  = data.roadmap
   site.footer   = data.footer
 }

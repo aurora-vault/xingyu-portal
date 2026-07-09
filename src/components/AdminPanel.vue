@@ -113,7 +113,8 @@
           <section v-if="activeTab === 'product'">
             <Field label="模块标题" v-model="site.product.title" />
             <Field label="模块描述" v-model="site.product.desc" type="textarea" />
-            <Field label="解锁按钮文字" v-model="site.product.unlockText" />
+            <Field label="按钮文字" v-model="site.product.ctaText" />
+            <Field label="H5 访问地址" v-model="site.product.h5Url" />
           </section>
 
           <!-- 路线图 -->

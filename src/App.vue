@@ -19,7 +19,7 @@
         <h1 class="hero-title">{{ site.hero.title }}</h1>
         <p class="hero-desc">{{ site.hero.desc }}</p>
         <div class="hero-actions">
-          <button class="btn primary" @click="triggerDemoUnlock">
+          <button class="btn primary" @click="openH5">
             {{ site.hero.ctaPrimary }}
           </button>
           <button class="btn secondary">{{ site.hero.ctaSecondary }}</button>
@@ -67,11 +67,12 @@
         <p class="section-desc">{{ site.product.desc }}</p>
 
         <div class="product-showcase">
+          <button class="btn primary product-cta" @click="openH5">
+            {{ site.product.ctaText }}
+          </button>
           <div class="qr-container">
-            <div class="qr-box unlock-box" @click="triggerDemoUnlock">
-              <div class="unlock-text">🔒 {{ site.product.unlockText }}</div>
-            </div>
-            <p>微信扫一扫 体验小程序</p>
+            <img class="h5-qr" :src="h5QrSrc" alt="行遇 H5 端二维码" />
+            <p>手机扫码 · 浏览器打开即用</p>
           </div>
         </div>
       </div>
@@ -198,100 +199,29 @@
       />
     </div>
   </transition>
-  <transition name="fade">
-    <div
-      class="lightbox-overlay"
-      v-if="showInviteModal"
-      @click="showInviteModal = false"
-    >
-      <div class="invite-modal" @click.stop>
-        <h3>内部演示通道</h3>
-        <p>请输入邀测码以解锁产品 Demo</p>
-        <div class="input-group" :class="{ 'has-error': inviteError }">
-          <input
-            type="password"
-            v-model="inviteCode"
-            placeholder="请输入邀请码"
-            @keyup.enter="verifyInviteCode"
-            @input="inviteError = false"
-            autofocus
-          />
-          <button @click="verifyInviteCode">→</button>
-        </div>
-        <span class="error-msg" v-show="inviteError"
-          >邀请码不正确，请重新输入</span
-        >
-      </div>
-    </div>
-  </transition>
-
-  <transition name="fade">
-    <div class="lightbox-overlay" v-if="showDemoQr" @click="showDemoQr = false">
-      <button class="lightbox-close" @click="showDemoQr = false">×</button>
-      <div class="demo-qr-panel" @click.stop>
-        <h3>微信扫码体验</h3>
-        <img :src="decryptedQrUrl" alt="Demo QR" class="demo-qr-img" />
-        <p>请使用授权的内部测试账号扫码</p>
-      </div>
-    </div>
-  </transition>
-
   <AdminPanel />
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, computed, onMounted, onUnmounted } from "vue";
 import { site, fetchSiteConfig, subscribeSiteEvents } from "@/config/siteStore";
 import BrandLogo from "@/components/BrandLogo.vue";
 import AdminPanel from "@/components/AdminPanel.vue";
 // 滚动状态机：控制回顶按钮的挂载与卸载
 const showBackToTop = ref(false);
 const showLicense = ref(false);
-const showInviteModal = ref(false);
-const showDemoQr = ref(false);
-const inviteCode = ref("");
-const inviteError = ref(false);
-const decryptedQrUrl = ref("");
 let unsubscribeSse: (() => void) | null = null;
 
-// 触发器：打开输入框
-const triggerDemoUnlock = () => {
-  inviteCode.value = "";
-  inviteError.value = false;
-  showInviteModal.value = true;
+// H5 端入口：按钮点击直接跳转；二维码供手机端扫码
+const openH5 = () => {
+  window.open(site.product.h5Url, "_blank", "noopener,noreferrer");
 };
-// 核心解密引擎：XOR 逆向运算
-const decryptUrl = (hexStr, key) => {
-  return hexStr
-    .match(/.{2}/g)
-    .map((h, i) =>
-      String.fromCharCode(parseInt(h, 16) ^ key.charCodeAt(i % key.length)),
-    )
-    .join("");
-};
-
-// 核心校验引擎：简单的字符串 Hash 算法 (极客级防 F12 偷窥)
-const verifyInviteCode = () => {
-  if (!inviteCode.value) return;
-
-  let h = 0;
-  const str = inviteCode.value.trim();
-  for (let i = 0; i < str.length; i++) {
-    h = (Math.imul(31, h) + str.charCodeAt(i)) | 0;
-  }
-
-  // 与 site.js 中的 hash 值进行物理碰撞比对
-  if (h === site.product.inviteHash) {
-    showInviteModal.value = false;
-
-    // 👇 校验通过！立刻用用户输入的密码作为密钥，解密出真实的图片 URL
-    decryptedQrUrl.value = decryptUrl(site.product.qrCodeCipher, str);
-
-    showDemoQr.value = true;
-  } else {
-    inviteError.value = true; // 验证失败，触发 UI 震动警告
-  }
-};
+const h5QrSrc = computed(
+  () =>
+    `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&data=${encodeURIComponent(
+      site.product.h5Url,
+    )}`,
+);
 
 const handleScroll = () => {
   // 当 Y 轴滚动深度超过 300px 时触发 VNode 渲染
@@ -853,155 +783,22 @@ html {
 }
 
 /* =======================================================
-   产品区解锁框 (Unlock Box)
+   产品区 H5 入口 (CTA + 二维码)
    ======================================================= */
-.unlock-box {
-  cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
+.product-cta {
+  padding: 16px 48px;
+  font-size: 17px;
 }
-.unlock-box:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 15px 30px rgba(29, 82, 141, 0.15);
-  border-color: var(--theme-start);
-}
-.unlock-text {
-  width: 150px;
-  height: 150px;
-  background: #f1f5f9;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--theme-end);
-  font-weight: bold;
-  font-size: 15px;
-  transition: all 0.3s;
-}
-.unlock-box:hover .unlock-text {
-  background: rgba(54, 188, 229, 0.1);
-}
-
-/* =======================================================
-   邀请码交互面板 (Invite Modal)
-   ======================================================= */
-.invite-modal {
+.h5-qr {
+  width: 180px;
+  height: 180px;
+  border-radius: 12px;
   background: #fff;
-  padding: 40px;
-  border-radius: 16px;
-  width: 90%;
-  max-width: 400px;
-  text-align: center;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
-  animation: modalPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-.invite-modal h3 {
-  color: var(--theme-end);
-  margin-bottom: 10px;
-  font-size: 22px;
-}
-.invite-modal p {
-  color: var(--text-gray);
-  margin-bottom: 25px;
-  font-size: 14px;
+  padding: 10px;
+  border: 1px solid rgba(54, 188, 229, 0.2);
+  box-shadow: 0 10px 25px rgba(29, 82, 141, 0.1);
 }
 
-.input-group {
-  display: flex;
-  align-items: center;
-  background: #f8fafc;
-  border: 2px solid #e2e8f0;
-  border-radius: 30px;
-  padding: 5px 5px 5px 20px;
-  transition: all 0.3s;
-}
-.input-group:focus-within {
-  border-color: var(--theme-start);
-  box-shadow: 0 0 0 3px rgba(54, 188, 229, 0.1);
-}
-.input-group.has-error {
-  border-color: #ef4444;
-  animation: shake 0.4s ease-in-out;
-}
-.input-group input {
-  flex: 1;
-  border: none;
-  background: transparent;
-  outline: none;
-  font-size: 16px;
-  color: var(--text-dark);
-}
-.input-group button {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: none;
-  background: linear-gradient(135deg, var(--theme-start), var(--theme-end));
-  color: #fff;
-  font-size: 18px;
-  cursor: pointer;
-  transition: transform 0.2s;
-}
-.input-group button:active {
-  transform: scale(0.9);
-}
-.error-msg {
-  display: block;
-  color: #ef4444;
-  font-size: 12px;
-  margin-top: 10px;
-}
-
-/* =======================================================
-   真实 Demo 渲染面板
-   ======================================================= */
-.demo-qr-panel {
-  background: #fff;
-  padding: 30px;
-  border-radius: 16px;
-  text-align: center;
-  animation: modalPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-.demo-qr-panel h3 {
-  color: var(--theme-end);
-  margin-bottom: 20px;
-}
-.demo-qr-img {
-  width: 220px;
-  height: 220px;
-  border-radius: 8px;
-  margin-bottom: 15px;
-}
-.demo-qr-panel p {
-  color: var(--text-gray);
-  font-size: 13px;
-}
-
-@keyframes modalPop {
-  from {
-    opacity: 0;
-    transform: scale(0.9) translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-@keyframes shake {
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-  25% {
-    transform: translateX(-5px);
-  }
-  50% {
-    transform: translateX(5px);
-  }
-  75% {
-    transform: translateX(-5px);
-  }
-}
 
 /* 科技感网格背景 */
 .tech-grid-bg {

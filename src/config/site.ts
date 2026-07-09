@@ -32,10 +32,8 @@ export interface Feature {
 export interface Product {
   title: string;
   desc: string;
-  unlockText: string;
-  inviteHash: number;
-  qrCodeCipher: string;
-  mockups: string[];
+  ctaText: string;
+  h5Url: string;
 }
 
 export interface RoadmapPhase {
@@ -91,7 +89,7 @@ export const siteData: Readonly<SiteData> = Object.freeze({
   hero: {
     title: "专业的本地向导服务团队",
     desc: "深入城市肌理，体验纯粹的本地文化。行遇为您提供经过严格甄选的专业向导与定制化伴游服务，让旅途省心、安心、暖心。",
-    ctaPrimary: "下载 App (内测中)",
+    ctaPrimary: "开启旅程",
     ctaSecondary: "预约向导",
   },
 
@@ -126,14 +124,9 @@ export const siteData: Readonly<SiteData> = Object.freeze({
 
   product: {
     title: "终端产品体验",
-    desc: "微信小程序端 Demo 已上线，提供完整的用户端发单与向导端接单状态机流转演示。",
-    unlockText: "点击解锁 Demo",
-    inviteHash: Number(import.meta.env.VITE_INVITE_HASH) || -969154679,
-    qrCodeCipher: import.meta.env.VITE_QR_CIPHER || "4e151f471e565f",
-    mockups: [
-      "https://img.shabox.fun/@system/defaults/mockup1.png",
-      "https://img.shabox.fun/@system/defaults/mockup2.png",
-    ],
+    desc: "行遇 H5 端已开放体验。完整的用户端发单与向导端接单状态机流转，浏览器打开即用，无需下载安装。",
+    ctaText: "开启旅程",
+    h5Url: "https://www.xingyu.pro",
   },
 
   roadmap: {
