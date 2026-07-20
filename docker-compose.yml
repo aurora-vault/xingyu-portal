@@ -1,10 +1,10 @@
-name: xingyu-web
+name: xingyu-portal
 
 services:
-  site:
-    image: shabox/xingyu-web:latest
+  portal:
+    image: xingyu/portal:latest
     build: .
-    container_name: xingyu-web
+    container_name: xingyu-portal
     restart: unless-stopped
     environment:
       - TZ=Asia/Shanghai
@@ -16,7 +16,7 @@ services:
       default: {}
       npm-net:
         aliases:
-          - xingyu-web
+          - xingyu-portal
 
 networks:
   npm-net:
