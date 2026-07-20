@@ -1,4 +1,4 @@
-name: Deploy Xingyu Web
+name: Deploy Xingyu Portal
 
 on:
   push:
@@ -13,8 +13,8 @@ jobs:
       - name: Sync and deploy
         run: |
           set -e
-          cd /opt/projects/xingyu-web
+          cd /opt/projects/xingyu-portal
           git fetch --all --prune
           git reset --hard origin/main
           docker compose up -d --build --remove-orphans
-          docker ps --filter name=xingyu-web
+          docker ps --filter name=xingyu-portal
