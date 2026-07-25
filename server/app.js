@@ -2,27 +2,22 @@
 
 const express = require('express')
 const cors = require('cors')
-const jwt = require('jsonwebtoken')
-const rateLimit = require('express-rate-limit')
 const fs = require('fs')
 const path = require('path')
 
 const app = express()
-// 信任 NPM 反向代理一层:使 req.ip / 登录限速按真实客户端 IP 计算(否则限速按代理 IP,误锁+防不住暴破)
+// 信任 NPM 反向代理一层:使 req.ip 按真实客户端 IP
 app.set('trust proxy', 1)
 const PORT = process.env.PORT || 3000
 
-// 管理员凭证（单账号，从 env；未来需多用户/RBAC 再扩展）
-const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin'
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'changeme'
-const JWT_SECRET = process.env.JWT_SECRET || 'dev-only-insecure-secret'
-const JWT_EXPIRES_IN = '8h'
+// companion-api 内省端点(验证 cms 传来的 SSO token,不持任何密钥)
+const COMPANION_API = process.env.COMPANION_API_BASE || 'https://api.xingyu.pro/v1/companion'
+// 本 cms 工具的 slug(面板注册用;内省后判断 managedTools 是否含它)
+const CMS_TOOL_SLUG = process.env.CMS_TOOL_SLUG || 'portal-cms'
 
-// 官网配置文件（唯一数据源，前后台共用）
 const CONFIG_FILE = path.join(__dirname, 'data', 'site-config.json')
 const DIST_DIR = path.join(__dirname, '..', 'dist')
 
-// CORS：官网（同源）+ 内容管理后台 cms.xingyu.pro + 本地开发
 const ALLOWED_ORIGINS = [
   'https://xingyu.pro',
   'https://www.xingyu.pro',
@@ -31,57 +26,62 @@ const ALLOWED_ORIGINS = [
 ]
 app.use(cors({ origin: ALLOWED_ORIGINS, credentials: false }))
 app.use(express.json())
-
-// 静态文件托管（生产环境，官网）
 app.use(express.static(DIST_DIR))
 
-// 登录限速：防暴破
-const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 10,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { ok: false, msg: '尝试过于频繁，请稍后再试' },
-})
-
-// SSE 客户端列表（官网访客 + 后台预览 iframe）
 const sseClients = new Set()
 
-// JWT 校验中间件
+// 内省缓存:token -> { allowed, exp }(30s,避免每请求一跳 companion-api)
+const introspectCache = new Map()
+const INTROSPECT_TTL = 30000
+
+async function introspect(token) {
+  const now = Date.now()
+  const cached = introspectCache.get(token)
+  if (cached && cached.exp > now) return cached.allowed
+
+  let allowed = false
+  try {
+    const res = await fetch(COMPANION_API + '/admin/me', {
+      headers: { Authorization: 'Bearer ' + token },
+    })
+    if (res.ok) {
+      const json = await res.json()
+      const me = json.data || json
+      allowed =
+        me.role === 'super' ||
+        (Array.isArray(me.managedTools) && me.managedTools.includes(CMS_TOOL_SLUG))
+    }
+  } catch {
+    // companion-api 不可达 → 保守拒绝
+  }
+  introspectCache.set(token, { allowed, exp: now + INTROSPECT_TTL })
+  return allowed
+}
+
+// 内省认证中间件
 function requireAdmin(req, res, next) {
   const auth = req.headers['authorization'] || ''
   const token = auth.startsWith('Bearer ') ? auth.slice(7) : ''
   if (!token) return res.status(401).json({ ok: false, msg: '未登录' })
-  try {
-    jwt.verify(token, JWT_SECRET)
-    next()
-  } catch {
-    return res.status(401).json({ ok: false, msg: '登录已过期，请重新登录' })
-  }
+  introspect(token)
+    .then((allowed) => {
+      if (!allowed) {
+        return res
+          .status(403)
+          .json({ ok: false, msg: '无官网编辑权限(需超管或被指派为本工具管理员)' })
+      }
+      next()
+    })
+    .catch(() => res.status(401).json({ ok: false, msg: '会话验证失败' }))
 }
 
-// POST /api/admin/login — 登录，签发 JWT
-app.post('/api/admin/login', loginLimiter, (req, res) => {
-  const { username, password } = req.body || {}
-  if (username !== ADMIN_USERNAME || password !== ADMIN_PASSWORD) {
-    return res.status(401).json({ ok: false, msg: '用户名或密码错误' })
-  }
-  const token = jwt.sign({ sub: username, role: 'admin' }, JWT_SECRET, {
-    expiresIn: JWT_EXPIRES_IN,
-  })
-  res.json({ ok: true, data: { token, username } })
-})
-
-// GET /api/site-config — 读取配置（公开，官网访客也要读）
+// GET /api/site-config — 读取配置(公开,官网访客也要读)
 app.get('/api/site-config', (req, res) => {
-  if (!fs.existsSync(CONFIG_FILE)) {
-    return res.json({ ok: true, data: null }) // null 表示用前端默认值
-  }
-  const raw = fs.readFileSync(CONFIG_FILE, 'utf-8')
-  res.json({ ok: true, data: JSON.parse(raw) })
+  if (!fs.existsSync(CONFIG_FILE)) return res.json({ ok: true, data: null })
+  res.json({ ok: true, data: JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf-8')) })
 })
 
-// POST /api/site-config — 保存配置（需 JWT）
+// POST /api/site-config — 保存配置(内省认证)
 app.post('/api/site-config', requireAdmin, (req, res) => {
   const config = req.body
   if (!config || typeof config !== 'object') {
@@ -90,16 +90,14 @@ app.post('/api/site-config', requireAdmin, (req, res) => {
   fs.mkdirSync(path.dirname(CONFIG_FILE), { recursive: true })
   fs.writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2), 'utf-8')
 
-  // 推送给所有 SSE 客户端（官网访客 + 后台预览 iframe）
+  // 推送给所有 SSE 客户端(官网访客 + 后台预览 iframe)
   const payload = `data: ${JSON.stringify(config)}\n\n`
-  for (const client of sseClients) {
-    client.write(payload)
-  }
+  for (const client of sseClients) client.write(payload)
 
   res.json({ ok: true })
 })
 
-// GET /api/site-config/events — SSE 长连接（公开，官网订阅实时更新）
+// GET /api/site-config/events — SSE 长连接(公开,官网订阅实时更新)
 app.get('/api/site-config/events', (req, res) => {
   res.setHeader('Content-Type', 'text/event-stream')
   res.setHeader('Cache-Control', 'no-cache')
@@ -107,10 +105,7 @@ app.get('/api/site-config/events', (req, res) => {
   res.flushHeaders()
 
   sseClients.add(res)
-
-  // 心跳，防止代理断连
   const heartbeat = setInterval(() => res.write(': ping\n\n'), 25000)
-
   req.on('close', () => {
     clearInterval(heartbeat)
     sseClients.delete(res)
@@ -120,13 +115,10 @@ app.get('/api/site-config/events', (req, res) => {
 // SPA fallback
 app.get('*', (req, res) => {
   const index = path.join(DIST_DIR, 'index.html')
-  if (fs.existsSync(index)) {
-    res.sendFile(index)
-  } else {
-    res.status(404).send('Not found')
-  }
+  if (fs.existsSync(index)) res.sendFile(index)
+  else res.status(404).send('Not found')
 })
 
 app.listen(PORT, () => {
-  console.log(`[xingyu-portal] server running on port ${PORT}`)
+  console.log(`[xingyu-portal] server running on port ${PORT} (introspect via ${COMPANION_API})`)
 })
