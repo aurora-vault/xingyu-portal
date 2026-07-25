@@ -1,5 +1,5 @@
 <template>
-  <div class="app-container">
+  <div class="app-container" :style="themeVars">
     <header class="nav-bar">
       <BrandLogo :name="site.brand.name" />
       <nav class="menu">
@@ -105,6 +105,7 @@
     <footer id="contact" class="compliance-footer">
       <div class="footer-content">
         <BrandLogo :name="site.brand.name" class="footer-logo" />
+        <p v-if="site.brand.slogan" class="footer-slogan">{{ site.brand.slogan }}</p>
 
         <div class="footer-grid">
           <div class="footer-col">
@@ -209,13 +210,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, onUnmounted } from "vue";
+import { ref, computed, watch, onMounted, onUnmounted } from "vue";
 import QRCode from "qrcode";
 import { site, fetchSiteConfig, subscribeSiteEvents } from "@/config/siteStore";
 import BrandLogo from "@/components/BrandLogo.vue";
 // 滚动状态机：控制回顶按钮的挂载与卸载
 const showBackToTop = ref(false);
 const showLicense = ref(false);
+// 主题色:跟随 brand.colors 注入 CSS 变量,全站渐变/标题/按钮实时跟随
+const themeVars = computed(() => ({
+  "--theme-start": site.brand.colors?.[0] || "#36bce5",
+  "--theme-end": site.brand.colors?.[1] || "#1d528d",
+}));
 let unsubscribeSse: (() => void) | null = null;
 
 // H5 端入口：按钮点击直接跳转；二维码供手机端扫码
@@ -421,9 +427,9 @@ html {
   font-weight: 900;
   line-height: 1.2;
   /* 1. 纯色兜底：防止任何渐变或透明属性失效 */
-  color: #1d528d !important;
+  color: var(--theme-end) !important;
   /* 2. 注入渐变色 */
-  background: linear-gradient(135deg, #1d528d, #36bce5);
+  background: linear-gradient(135deg, var(--theme-end), var(--theme-start));
   /* 3. 裁剪背景至文字形状，并开启透明文字透出背景 */
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
@@ -452,8 +458,8 @@ html {
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 .btn.primary {
-  background-color: #33b8e4 !important; /* 兜底纯色，防止渐变渲染失败 */
-  background-image: linear-gradient(135deg, #33b8e4, #0661b1) !important;
+  background-color: var(--theme-start) !important; /* 兜底纯色，防止渐变渲染失败 */
+  background-image: linear-gradient(135deg, var(--theme-start), var(--theme-end)) !important;
   color: #ffffff !important; /* 强制白字 */
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2); /* 增加文字阴影，提高对比度 */
   box-shadow: 0 4px 15px rgba(6, 97, 177, 0.3);
@@ -704,6 +710,12 @@ html {
   max-width: 1200px;
   margin: 0 auto;
 }
+.footer-slogan {
+  margin-top: 10px;
+  font-size: 13px;
+  color: #94a3b8;
+  letter-spacing: 0.5px;
+}
 .footer-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -923,8 +935,8 @@ html {
     /* 物理阻断：强制纯白文字，并用 !important 斩断一切外部污染 */
     color: #ffffff !important;
     /* 物理阻断：强制注入纯色背景兜底，防止渐变失效 */
-    background-color: #36bce5 !important;
-    background-image: linear-gradient(135deg, #36bce5, #1d528d) !important;
+    background-color: var(--theme-start) !important;
+    background-image: linear-gradient(135deg, var(--theme-start), var(--theme-end)) !important;
     border-radius: 20px;
     box-shadow: 0 4px 10px rgba(29, 82, 141, 0.2);
   }
