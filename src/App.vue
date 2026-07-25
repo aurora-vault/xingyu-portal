@@ -14,7 +14,7 @@
       <div class="tech-grid-bg" aria-hidden="true"></div>
 
       <div class="hero-content">
-        <div class="version-badge">✨ 全新本地出行生态</div>
+        <div v-if="site.hero.badge" class="version-badge">{{ site.hero.badge }}</div>
 
         <h1 class="hero-title">{{ site.hero.title }}</h1>
         <p class="hero-desc">{{ site.hero.desc }}</p>
@@ -212,7 +212,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from "vue";
 import QRCode from "qrcode";
-import { site, fetchSiteConfig, subscribeSiteEvents } from "@/config/siteStore";
+import { site, fetchSiteConfig, subscribeSiteEvents, subscribePreviewMessages } from "@/config/siteStore";
 import BrandLogo from "@/components/BrandLogo.vue";
 // 滚动状态机：控制回顶按钮的挂载与卸载
 const showBackToTop = ref(false);
@@ -223,6 +223,7 @@ const themeVars = computed(() => ({
   "--theme-end": site.brand.colors?.[1] || "#1d528d",
 }));
 let unsubscribeSse: (() => void) | null = null;
+let unsubscribePreview: (() => void) | null = null;
 
 // H5 端入口：按钮点击直接跳转；二维码供手机端扫码
 const openH5 = () => {
@@ -269,12 +270,14 @@ onMounted(() => {
   window.addEventListener("keydown", handleKeydown);
   fetchSiteConfig();
   unsubscribeSse = subscribeSiteEvents();
+  unsubscribePreview = subscribePreviewMessages();
 });
 
 onUnmounted(() => {
   window.removeEventListener("scroll", handleScroll);
   window.removeEventListener("keydown", handleKeydown);
   unsubscribeSse?.();
+  unsubscribePreview?.();
 });
 </script>
 

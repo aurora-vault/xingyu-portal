@@ -16,6 +16,8 @@ const COMPANION_API = process.env.COMPANION_API_BASE || 'https://api.xingyu.pro/
 const CMS_TOOL_SLUG = process.env.CMS_TOOL_SLUG || 'portal-cms'
 
 const CONFIG_FILE = path.join(__dirname, 'data', 'site-config.json')
+const HISTORY_FILE = path.join(__dirname, 'data', 'site-config-history.json')
+const HISTORY_MAX = 100
 const DIST_DIR = path.join(__dirname, '..', 'dist')
 
 const ALLOWED_ORIGINS = [
@@ -94,6 +96,65 @@ app.post('/api/site-config', requireAdmin, (req, res) => {
   const payload = `data: ${JSON.stringify(config)}\n\n`
   for (const client of sseClients) client.write(payload)
 
+  res.json({ ok: true })
+})
+
+// ---------- 版本历史(site-config-history.json,每次发布自动存档,FIFO 上限 100) ----------
+function readHistory() {
+  try {
+    return JSON.parse(fs.readFileSync(HISTORY_FILE, 'utf-8'))
+  } catch {
+    return []
+  }
+}
+function writeHistory(list) {
+  fs.mkdirSync(path.dirname(HISTORY_FILE), { recursive: true })
+  fs.writeFileSync(HISTORY_FILE, JSON.stringify(list, null, 2), 'utf-8')
+}
+
+// GET /api/site-config/history — 历史列表(含完整 config,单条 ~2KB)
+app.get('/api/site-config/history', requireAdmin, (req, res) => {
+  res.json({ ok: true, data: readHistory() })
+})
+
+// POST /api/site-config/history — 新增一条存档(CMS 保存后自动调)
+app.post('/api/site-config/history', requireAdmin, (req, res) => {
+  const { name, config } = req.body || {}
+  if (!config || typeof config !== 'object') {
+    return res.status(400).json({ ok: false, msg: '缺少 config' })
+  }
+  const list = readHistory()
+  const rec = {
+    id: String(Date.now()) + '-' + Math.random().toString(36).slice(2, 8),
+    name: String(name || '').slice(0, 60),
+    createdAt: new Date().toISOString(),
+    config,
+  }
+  list.unshift(rec)
+  if (list.length > HISTORY_MAX) list.length = HISTORY_MAX
+  writeHistory(list)
+  res.json({ ok: true, data: rec })
+})
+
+// PATCH /api/site-config/history/:id — 改名
+app.patch('/api/site-config/history/:id', requireAdmin, (req, res) => {
+  const { name } = req.body || {}
+  const list = readHistory()
+  const rec = list.find((r) => r.id === req.params.id)
+  if (!rec) return res.status(404).json({ ok: false, msg: '记录不存在' })
+  rec.name = String(name || '').slice(0, 60)
+  writeHistory(list)
+  res.json({ ok: true, data: rec })
+})
+
+// DELETE /api/site-config/history/:id — 删除
+app.delete('/api/site-config/history/:id', requireAdmin, (req, res) => {
+  const list = readHistory()
+  const next = list.filter((r) => r.id !== req.params.id)
+  if (next.length === list.length) {
+    return res.status(404).json({ ok: false, msg: '记录不存在' })
+  }
+  writeHistory(next)
   res.json({ ok: true })
 })
 

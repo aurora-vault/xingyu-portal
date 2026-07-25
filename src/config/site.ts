@@ -15,6 +15,7 @@ export interface Hero {
   desc: string;
   ctaPrimary: string;
   ctaSecondary: string;
+  badge: string;
 }
 
 export interface About {
@@ -91,6 +92,7 @@ export const siteData: Readonly<SiteData> = Object.freeze({
     desc: "深入城市肌理，体验纯粹的本地文化。行遇为您提供经过严格甄选的专业向导与定制化伴游服务，让旅途省心、安心、暖心。",
     ctaPrimary: "开启旅程",
     ctaSecondary: "预约向导",
+    badge: "✨ 全新本地出行生态",
   },
 
   about: {
