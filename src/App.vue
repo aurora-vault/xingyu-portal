@@ -206,7 +206,6 @@
       />
     </div>
   </transition>
-  <AdminPanel />
 </template>
 
 <script setup lang="ts">
@@ -214,7 +213,6 @@ import { ref, watch, onMounted, onUnmounted } from "vue";
 import QRCode from "qrcode";
 import { site, fetchSiteConfig, subscribeSiteEvents } from "@/config/siteStore";
 import BrandLogo from "@/components/BrandLogo.vue";
-import AdminPanel from "@/components/AdminPanel.vue";
 // 滚动状态机：控制回顶按钮的挂载与卸载
 const showBackToTop = ref(false);
 const showLicense = ref(false);
