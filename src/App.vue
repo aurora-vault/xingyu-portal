@@ -22,7 +22,9 @@
           <button class="btn primary" @click="openH5">
             {{ site.hero.ctaPrimary }}
           </button>
-          <button class="btn secondary">{{ site.hero.ctaSecondary }}</button>
+          <button class="btn secondary" @click="openH5">
+            {{ site.hero.ctaSecondary }}
+          </button>
         </div>
       </div>
 

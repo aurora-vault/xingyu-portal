@@ -3,7 +3,6 @@ server/node_modules
 dist
 .git
 .github
-.vercel
 .env
 .env.local
 server/data
