@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1d528d"/>
+      <stop offset="1" stop-color="#36bce5"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <circle cx="990" cy="110" r="190" fill="#ffffff" opacity="0.06"/>
+  <circle cx="130" cy="570" r="150" fill="#ffffff" opacity="0.05"/>
+  <text x="100" y="300" font-family="system-ui, -apple-system, sans-serif" font-size="140" font-weight="900" fill="#ffffff">行遇</text>
+  <text x="106" y="372" font-family="system-ui, -apple-system, sans-serif" font-size="42" fill="#e0f2fe">专业的本地向导服务平台</text>
+  <text x="106" y="498" font-family="system-ui, -apple-system, sans-serif" font-size="36" fill="#ffffff" opacity="0.9">严选向导 · 专属定制 · 全流程保障</text>
+  <text x="106" y="556" font-family="system-ui, -apple-system, sans-serif" font-size="32" fill="#e0f2fe" opacity="0.85">xingyu.pro</text>
+</svg>

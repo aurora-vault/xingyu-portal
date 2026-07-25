@@ -11,7 +11,7 @@
     </header>
 
     <section id="hero" class="hero-section">
-      <div class="tech-grid-bg"></div>
+      <div class="tech-grid-bg" aria-hidden="true"></div>
 
       <div class="hero-content">
         <div class="version-badge">✨ 全新本地出行生态</div>
@@ -28,8 +28,8 @@
         </div>
       </div>
 
-      <div class="floating-orb orb-1"></div>
-      <div class="floating-orb orb-2"></div>
+      <div class="floating-orb orb-1" aria-hidden="true"></div>
+      <div class="floating-orb orb-2" aria-hidden="true"></div>
     </section>
 
     <section id="about" class="about-section">
@@ -73,7 +73,7 @@
             {{ site.product.ctaText }}
           </button>
           <div class="qr-container">
-            <img class="h5-qr" :src="h5QrSrc" alt="行遇 H5 端二维码" />
+            <img class="h5-qr" :src="h5QrSrc" alt="扫描打开行遇 H5 用户端" />
             <p>手机扫码 · 浏览器打开即用</p>
           </div>
         </div>
@@ -160,6 +160,7 @@
       :key="'side-' + item.id"
       :href="`#${item.id}`"
       class="float-item"
+      :aria-label="item.name"
     >
       <span class="tooltip">{{ item.name }}</span>
       <div class="dot"></div>
@@ -170,6 +171,7 @@
       class="fab-btn top-btn"
       :class="{ 'is-visible': showBackToTop }"
       @click="scrollToTop"
+      aria-label="回到顶部"
     >
       <svg
         viewBox="0 0 24 24"
@@ -191,6 +193,9 @@
       class="lightbox-overlay"
       v-if="showLicense"
       @click="showLicense = false"
+      role="dialog"
+      aria-modal="true"
+      aria-label="营业执照"
     >
       <button class="lightbox-close" @click="showLicense = false">×</button>
       <img
@@ -205,7 +210,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from "vue";
+import { ref, watch, onMounted, onUnmounted } from "vue";
+import QRCode from "qrcode";
 import { site, fetchSiteConfig, subscribeSiteEvents } from "@/config/siteStore";
 import BrandLogo from "@/components/BrandLogo.vue";
 import AdminPanel from "@/components/AdminPanel.vue";
@@ -218,11 +224,26 @@ let unsubscribeSse: (() => void) | null = null;
 const openH5 = () => {
   window.open(site.product.h5Url, "_blank", "noopener,noreferrer");
 };
-const h5QrSrc = computed(
-  () =>
-    `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&data=${encodeURIComponent(
-      site.product.h5Url,
-    )}`,
+const h5QrSrc = ref("");
+// 二维码本地生成：去第三方 api.qrserver.com（隐私 + 不依赖外部可用性）
+watch(
+  () => site.product.h5Url,
+  async (url) => {
+    if (!url) {
+      h5QrSrc.value = "";
+      return;
+    }
+    try {
+      h5QrSrc.value = await QRCode.toDataURL(url, {
+        width: 240,
+        margin: 1,
+        color: { dark: "#0f172a", light: "#ffffff" },
+      });
+    } catch {
+      h5QrSrc.value = "";
+    }
+  },
+  { immediate: true },
 );
 
 const handleScroll = () => {
@@ -234,14 +255,21 @@ const scrollToTop = () => {
   window.scrollTo({ top: 0, behavior: "smooth" });
 };
 
+// ESC 关闭营业执照灯箱
+const handleKeydown = (e: KeyboardEvent) => {
+  if (e.key === "Escape" && showLicense.value) showLicense.value = false;
+};
+
 onMounted(() => {
   window.addEventListener("scroll", handleScroll, { passive: true });
+  window.addEventListener("keydown", handleKeydown);
   fetchSiteConfig();
   unsubscribeSse = subscribeSiteEvents();
 });
 
 onUnmounted(() => {
   window.removeEventListener("scroll", handleScroll);
+  window.removeEventListener("keydown", handleKeydown);
   unsubscribeSse?.();
 });
 </script>
