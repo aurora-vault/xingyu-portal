@@ -8,6 +8,8 @@ const fs = require('fs')
 const path = require('path')
 
 const app = express()
+// 信任 NPM 反向代理一层:使 req.ip / 登录限速按真实客户端 IP 计算(否则限速按代理 IP,误锁+防不住暴破)
+app.set('trust proxy', 1)
 const PORT = process.env.PORT || 3000
 
 // 管理员凭证（单账号，从 env；未来需多用户/RBAC 再扩展）
