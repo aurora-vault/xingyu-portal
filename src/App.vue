@@ -219,8 +219,9 @@ const showBackToTop = ref(false);
 const showLicense = ref(false);
 // 主题色:跟随 brand.colors 注入 CSS 变量,全站渐变/标题/按钮实时跟随
 const themeVars = computed(() => ({
-  "--theme-start": site.brand.colors?.[0] || "#36bce5",
-  "--theme-end": site.brand.colors?.[1] || "#1d528d",
+  "--theme-start": site.brand.colors?.[0] || "#30b2e1",
+  "--theme-end": site.brand.colors?.[1] || "#0975c4",
+  "--orb-opacity": (site.hero.orbIntensity ?? 30) / 100,
 }));
 let unsubscribeSse: (() => void) | null = null;
 let unsubscribePreview: (() => void) | null = null;
@@ -393,7 +394,7 @@ html {
   border-radius: 50%;
   filter: blur(40px);
   z-index: 1;
-  opacity: 0.5;
+  opacity: var(--orb-opacity, 0.5);
   animation: floatOrb 8s infinite alternate ease-in-out;
 }
 .orb-1 {
@@ -969,7 +970,7 @@ html {
   }
   /* 强制在手机端放大背景光球，填补空间空白 */
   .floating-orb {
-    opacity: 0.6;
+    opacity: var(--orb-opacity, 0.6);
     filter: blur(30px);
   }
   .orb-1 {

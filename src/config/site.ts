@@ -16,6 +16,7 @@ export interface Hero {
   ctaPrimary: string;
   ctaSecondary: string;
   badge: string;
+  orbIntensity: number;
 }
 
 export interface About {
@@ -77,7 +78,7 @@ export const siteData: Readonly<SiteData> = Object.freeze({
     name: "行遇",
     fullName: "行遇（武汉）网络科技有限公司",
     slogan: "让每一次出行都有温度",
-    colors: ["#36bce5", "#1d528d"],
+    colors: ["#30b2e1", "#0975c4"],
   },
 
   nav: [
@@ -93,6 +94,7 @@ export const siteData: Readonly<SiteData> = Object.freeze({
     ctaPrimary: "开启旅程",
     ctaSecondary: "预约向导",
     badge: "✨ 全新本地出行生态",
+    orbIntensity: 30,
   },
 
   about: {
@@ -166,7 +168,7 @@ export const siteData: Readonly<SiteData> = Object.freeze({
     icp: "鄂ICP备2026025932号-1",
     gongAn: "鄂公网安备42018502009010号",
     creditCode: "统一社会信用代码：91420100MAKBNJMC9W",
-    licenseImg: "https://img.shabox.fun/posts/210901di-yi/00.webp",
+    licenseImg: "https://img.xingyu.pro/system/f28b571b-3814-490b-830a-1c40f76d133a.png",
     phone: "",
     email: "hi@xingyu.pro",
     address:
