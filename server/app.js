@@ -14,6 +14,8 @@ const PORT = process.env.PORT || 3000
 const COMPANION_API = process.env.COMPANION_API_BASE || 'https://api.xingyu.pro/v1/companion'
 // 本 cms 工具的 slug(面板注册用;内省后判断 managedTools 是否含它)
 const CMS_TOOL_SLUG = process.env.CMS_TOOL_SLUG || 'portal-cms'
+// 总台审计上报服务令牌(配了才上报到 ops 统一审计流;不配则只用本地审计)
+const AUDIT_REPORT_TOKEN = process.env.AUDIT_REPORT_TOKEN || ''
 
 const CONFIG_FILE = path.join(__dirname, 'data', 'site-config.json')
 const HISTORY_FILE = path.join(__dirname, 'data', 'site-config-history.json')
@@ -93,6 +95,35 @@ function requireAdmin(req, res, next) {
     .catch(() => res.status(401).json({ ok: false, msg: '会话验证失败' }))
 }
 
+// 向总台上报审计事件(B,可选;best-effort,失败仅 console.warn 不阻断,不 await)
+async function reportAuditEvent({ adminId, action, targetType, targetId, detail, payload }) {
+  if (!AUDIT_REPORT_TOKEN || !adminId) return // 未配 token 或无 actor → 跳过
+  try {
+    const res = await fetch(COMPANION_API + '/admin/audit/report', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Audit-Report-Token': AUDIT_REPORT_TOKEN,
+      },
+      body: JSON.stringify({
+        toolSlug: CMS_TOOL_SLUG,
+        actorAdminId: adminId,
+        action,
+        targetType: targetType || 'site_config',
+        targetId: targetId || 'portal',
+        detail: detail || '',
+        payload: payload || {},
+      }),
+    })
+    if (!res.ok) {
+      const txt = await res.text().catch(() => '')
+      console.warn('[reportAuditEvent] 上报非 200:', res.status, txt.slice(0, 200))
+    }
+  } catch (e) {
+    console.warn('[reportAuditEvent] 上报失败:', e.message)
+  }
+}
+
 // GET /api/site-config — 读取配置(公开,官网访客也要读)
 app.get('/api/site-config', (req, res) => {
   if (!fs.existsSync(CONFIG_FILE)) return res.json({ ok: true, data: null })
@@ -147,6 +178,19 @@ app.post('/api/site-config', requireAdmin, (req, res) => {
       list.unshift(rec)
       if (list.length > AUDIT_MAX) list.length = AUDIT_MAX
       writeAudit(list)
+      // best-effort 上报总台统一审计流(失败仅告警,不阻断发布;不 await)
+      reportAuditEvent({
+        adminId: a.adminId,
+        action: isFirstPublish ? 'site_config.first_publish' : 'site_config.publish',
+        targetType: 'site_config',
+        targetId: 'portal',
+        detail: summary,
+        payload: {
+          changesCount: changes.length,
+          sample: changes.slice(0, 3).map((c) => ({ path: c.path })),
+          auditId: rec.id,
+        },
+      })
     }
   } catch {
     /* 审计写入失败不影响发布 */
