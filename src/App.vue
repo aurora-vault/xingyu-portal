@@ -293,6 +293,26 @@ body {
   overflow-x: hidden;
   background-color: #f8fafc; /* 统一底层背景色，防止滚动回弹漏出白底 */
   -webkit-font-smoothing: antialiased; /* 开启 macOS 字体抗锯齿物理渲染 */
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+/* 美化滚动条:细窄、药丸形、悬停加深 */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+  background-clip: padding-box;
 }
 </style>
 
@@ -392,24 +412,24 @@ html {
 .floating-orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(40px);
+  filter: blur(90px);
   z-index: 1;
   opacity: var(--orb-opacity, 0.5);
   animation: floatOrb 8s infinite alternate ease-in-out;
 }
 .orb-1 {
-  width: 300px;
-  height: 300px;
+  width: 440px;
+  height: 440px;
   background: var(--theme-start);
-  top: -100px;
-  left: -100px;
+  top: -140px;
+  left: -140px;
 }
 .orb-2 {
-  width: 250px;
-  height: 250px;
+  width: 360px;
+  height: 360px;
   background: var(--theme-end);
-  bottom: -50px;
-  right: -50px;
+  bottom: -90px;
+  right: -90px;
   animation-delay: -4s; /* 制造交错感 */
 }
 
@@ -971,19 +991,19 @@ html {
   /* 强制在手机端放大背景光球，填补空间空白 */
   .floating-orb {
     opacity: var(--orb-opacity, 0.6);
-    filter: blur(30px);
+    filter: blur(60px);
   }
   .orb-1 {
-    width: 220px;
-    height: 220px;
-    top: -50px;
-    left: -50px;
+    width: 300px;
+    height: 300px;
+    top: -80px;
+    left: -80px;
   }
   .orb-2 {
-    width: 180px;
-    height: 180px;
-    bottom: 0;
-    right: -20px;
+    width: 260px;
+    height: 260px;
+    bottom: -40px;
+    right: -40px;
   }
 
   .footer-grid {
