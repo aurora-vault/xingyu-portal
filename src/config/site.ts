@@ -94,7 +94,7 @@ export const siteData: Readonly<SiteData> = Object.freeze({
     ctaPrimary: "开启旅程",
     ctaSecondary: "预约向导",
     badge: "✨ 全新本地出行生态",
-    orbIntensity: 30,
+    orbIntensity: 15,
   },
 
   about: {
